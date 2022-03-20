@@ -759,10 +759,98 @@ done
 
 > 函数
 
+(1)函数定义
 
-> [] [[]] 与(())
+```
+语法：
+function name() {
+    statements
+    [return value]
+}
+
+1、可以带function fun() 定义，也可以直接fun() 定义,不带任何参数。
+2、参数返回，可以显示加：return 返回，如果不加，将以最后一条命令运行结果，作为返回值。 return后跟数值n(0-255)
+
+示例：
+name() {
+    statements
+    [return value]
+}
+
+如果写了 function 关键字，也可以省略函数名后面的小括号：
+function name {
+    statements
+    [return value]
+}
+```
+
+(2) 函数调用
+
+```
+1) 调用 Shell 函数时可以给它传递参数，也可以不传递。如果不传递参数，直接给出函数名字即可：
+
+    name
+
+2) 如果传递参数，那么多个参数之间以空格分隔：
+    name param1 param2 param3
+    
+不管是哪种形式，函数名字后面都不需要带括号
+
+3) 函数返回值在调用该函数后通过 $? 来获得
+
+示例1：
+#!/bin/bash
+function getsum(){
+    local sum=0
+    for n in $@   #遍历所有输入参数
+    do
+         ((sum+=n))
+    done
+    return $sum
+}
+getsum 10 20 55 15  #调用函数并传递参数
+echo $?
+total=$(getsum 10 20 55 15)  #调用函数并传递参数，最后将结果赋值给一个变量，有些系统不支持
+echo $total
+
+输出结果：
+ 100
+ 100
+
+```
+
+![image](https://user-images.githubusercontent.com/42632290/159164933-f0a4537b-0edd-4736-b3f4-acaacc27a7d7.png)
 
 
+> ()、(())、[]、[[]]、{}的作用与区别
+
+(1) $()和 ` `命令替换
+     
+     Shell 命令替换是指将命令的输出结果赋值给某个变量。比如，在某个目录中输入 ls 命令可查看当前目录中所有的文件，但如何将输出内容存入某个变量中呢？这就需要使用命令替换了，这也是 Shell 编程中使用非常频繁的功能。
+     
+     Shell 中有两种方式可以完成命令替换，一种是反引号``，一种是$()
+
+```
+例如:  
+    variable=`commands`
+    variable=$(commands)
+
+其中，variable 是变量名，commands 是要执行的命令。commands 可以只有一个命令，也可以有多个命令，多个命令之间以分号;分隔
+
+各自的优缺点：
+    1) ` ` 基本上可用在全部的 unix shell 中使用，若写成 shell script ，其移植性比较高，但反单引号容易打错或看错。
+    2) $()并不是所有shell都支持
+
+```
+
+
+(2) ${}
+
+(3) $[] $(()) 数学运算
+
+(4) [] test命令
+
+(5) (( ))及[[ ]] 
 
 > 输入输出重定向
 
