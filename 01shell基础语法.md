@@ -532,8 +532,232 @@ abc : 字符串不为空
 
 > 流程控制
 
+(1)if
+```
+语法：
+    if condition1
+    then
+        command1
+    elif condition2 
+    then 
+        command2
+    else
+        commandN
+    fi
+    
+示例：
+    a=10
+    b=20
+    
+    if [ $a == $b ]
+    then
+       echo "a 等于 b"
+    elif [ $a -gt $b ]
+    then
+       echo "a 大于 b"
+    elif [ $a -lt $b ]
+    then
+       echo "a 小于 b"
+    else
+       echo "没有符合的条件"
+    fi
+
+输出结果：
+a 小于 b
+```
+注意：在 sh/bash 里可不能这么写，如果 else 分支没有语句执行，就不要写这个 else
+
+(2) for 循环
+
+```
+语法：
+    for var in item1 item2 ... itemN  #in 列表可以包含替换、字符串和文件名。in列表是可选的，如果不用它，for循环使用命令行的位置参数
+    do
+        command1
+        command2
+        ...
+        commandN
+    done
+
+示例：
+    for loop in 1 2 3 4 5
+    do
+        echo "The value is: $loop"
+    done
+    
+    输出结果：
+        The value is: 1
+        The value is: 2
+        The value is: 3
+        The value is: 4
+        The value is: 5
+
+(3) while语句
+
+```
+语法：
+    while condition
+    do
+        command
+    done
+    
+示例：
+    #!/bin/bash
+    int=1
+    while(( $int<=5 ))
+    do
+        echo $int
+        let "int++"
+    done
+    运行脚本，输出：
+    1
+    2
+    3
+    4
+    5
+```
+
+(4) 无线循环语句
+
+```
+无限循环语法格式：
+                while :
+                do
+                    command
+                done
+                
+                或者
+
+                while true
+                    do
+                       command
+                done
+                
+               或者 
+               
+                  for (( ; ; ))
+````
+
+(5) until语句
+
+    until 循环执行一系列命令直至条件为 true 时停止
+```
+语法：
+    until condition  # condition 一般为条件表达式，如果返回值为 false，则继续执行循环体内的语句，否则跳出循环。
+    do
+        command
+    done
+    
+实例
+    #!/bin/bash
+
+    a=0
+
+    until [ ! $a -lt 5 ]
+    do
+       echo $a
+       a=`expr $a + 1`
+    done
+
+输出结果为：
+    0
+    1
+    2
+    3
+    4
+    5
+```
+
+(6) case 语句
+
+```
+语法：
+    case 值 in
+    模式1)
+        command1
+        command2
+        ...
+        commandN
+        ;;
+    模式2)           # 如果无一匹配模式，使用星号 * 捕获该值，再执行后面的命令。
+        command1
+        command2
+        ...
+        commandN
+        ;;
+     esac
+
+示例：
+
+echo '输入 1 到 4 之间的数字:'
+echo '你输入的数字为:'
+read aNum
+case $aNum in
+    1)  echo '你选择了 1'
+    ;;
+    2)  echo '你选择了 2'
+    ;;
+    3)  echo '你选择了 3'
+    ;;
+    4)  echo '你选择了 4'
+    ;;
+    *)  echo '你没有输入 1 到 4 之间的数字'
+    ;;
+esac
+
+输出结果：
+
+输入 1 到 4 之间的数字:
+你输入的数字为:
+3
+你选择了 3
+
+```
+
+(7)跳出循环：break和continue
+
+    break命令允许跳出所有循环（终止执行后面的所有循环）
+    continue命令与break命令类似，只有一点差别，它不会跳出所有循环，仅仅跳出当前循环
+    
+```
+示例1：
+#!/bin/bash
+while :
+do
+    echo -n "输入 1 到 5 之间的数字:"
+    read aNum
+    case $aNum in
+        1|2|3|4|5) echo "你输入的数字为 $aNum!"          #多模式匹配
+        ;;
+        *) echo "你输入的数字不是 1 到 5 之间的! 游戏结束"
+            break
+        ;;
+    esac
+done
+
+示例2：
+#!/bin/bash
+while :
+do
+    echo -n "输入 1 到 5 之间的数字: "
+    read aNum
+    case $aNum in
+        1|2|3|4|5) echo "你输入的数字为 $aNum!"
+        ;;
+        *) echo "你输入的数字不是 1 到 5 之间的!"
+            continue
+            echo "游戏结束"
+        ;;
+    esac
+done
+
+```
 
 > 函数
+
+
+> [] [[]] 与(())
+
 
 
 > 输入输出重定向
