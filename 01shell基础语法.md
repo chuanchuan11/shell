@@ -856,7 +856,9 @@ echo "external, b= $b"    # 括号内的变量可以被脚本余下部分使用
      对于()和{}，括号内的重定向符号只能影响到该条命令，括号外的重定向将影响到括号内的所有命令
  
 (2) 单中括号[]----> test命令
+
     test 通常和 if 语句一起使用, 判断 expression 是否成立，成立时退出状态为 0，否则为非 0 值。
+    
     test 命令有很多选项，可以进行数值、字符串和文件三个方面的检测，Shell test 命令的用法为：test expression，简写为：[ expression ]
 
 ```
@@ -937,7 +939,7 @@ fi
 
     分别是[]的针对 **数学比较表达式** 和 **字符串表达式** 的加强版
 
-    1) 双小括号 (( )) 是专门用来进行整数运算的命令, 是常用的运算命令。
+    1) (( )) 是专门用来进行整数运算的命令, 是常用的运算命令。
 
        注意：(( )) 只能进行整数运算，不能对小数（浮点数）或者字符串进行运算
 ```
@@ -974,7 +976,7 @@ fi
 注意：
     [[ ]] 对数字的比较仍然不友好，所以建议，使用 if 判断条件时，用 (()) 来处理整型数字，用 [[ ]] 来处理字符串或者文件
 
-(4) $()和 ` `命令替换
+(4) $()和 ``命令替换
      
      Shell 命令替换是指将**命令的输出结果**赋值给某个变量。比如，在某个目录中输入 ls 命令可查看当前目录中所有的文件，但如何将输出内容存入某个变量中呢？这就需要使用命令替换了，这也是 Shell 编程中使用非常频繁的功能。
      
@@ -1059,39 +1061,199 @@ fi
 
 > 输入输出重定向
 
+    输入输出重定向就是「改变输入与输出的方向」
+
+    为了表示和区分已经打开的文件，Linux 会给每个文件分配一个 ID，这个 ID 就是一个整数，被称为文件描述符（File Descriptor），
+    
+    stdin、stdout、stderr 默认都是打开的，在重定向的过程中，0、1、2 这三个文件描述符可以直接使用
+    
+![image](https://user-images.githubusercontent.com/42632290/160234453-5107298f-e0cc-47f3-939e-2e04a9333e9b.png)
+
+![image](https://user-images.githubusercontent.com/42632290/160234564-6d7cca69-782b-45fa-9bee-1360c7e1794c.png)
+
+    (1) 输出重定向:
+    
+      是指命令的结果不再输出到显示器上，而是输出到其它地方，一般是文件中。这样做的最大好处就是把命令的结果保存起来，当我们需要的时候可以随时查询
+
+![image](https://user-images.githubusercontent.com/42632290/160234490-b74e725d-7ad5-4d0b-ac40-114b6d0c4745.png)
+
+注意：
+    1) 输出重定向的完整写法其实是: fd>file或者fd>>file，其中 fd 表示文件描述符，如果不写，默认为 1，也就是标准输出文件[文件描述符为大于 1 的值时，比如 2，就必须写上]
+    2) 需要重点说明的是，fd和>之间不能有空格，否则 Shell 会解析失败；>和file之间的空格可有可无
+
+```
+示例1：把正确结果和错误信息都保存到一个文件中
+ls -l >out.log 2>&1
+ls java >>out.log 2>&1
+cat out.log
+总用量 12
+drwxr-xr-x. 2 root     root      21 7月   1 2016 abc
+-rw-r--r--. 1 mozhiyan mozhiyan 399 3月  11 17:12 demo.sh
+-rw-rw-r--. 1 mozhiyan mozhiyan 278 3月  16 17:17 main.c
+-rw-rw-r--. 1 mozhiyan mozhiyan   0 3月  22 17:39 out.log
+-rwxr-xr-x. 1 mozhiyan mozhiyan 187 3月  22 17:16 test.sh
+ls: 无法访问java: 没有那个文件或目录
+
+示例2：把正确结果和错误信息分开保存到不同的文件中
+ls -l >>out.log 2>>err.log
 
 
+```
 
+    (2) 输入重定向
+       
+       输入重定向就是改变输入的方向，不再使用键盘作为命令输入的来源，而是使用文件作为命令的输入
 
+![image](https://user-images.githubusercontent.com/42632290/160234855-f0631722-ccc9-4f8c-bf8a-a8b71a449164.png)
 
+       和输出重定向类似，输入重定向的完整写法是fd<file，其中 fd 表示文件描述符，如果不写，默认为 0，也就是标准输入文件
+
+```
+示例1： 
+     Linux wc 命令可以用来对文本进行统计，包括单词个数、行数、字节数，它的用法如下：
+     wc  [选项]  [文件名]
+     其中，-c选项统计字节数，-w选项统计单词数，-l选项统计行数
+
+#统计文件行数
+cat readme.txt  #预览一下文件内容
+    hello
+    world
+wc -l <readme.txt  #输入重定向
+2
+
+#逐行读取文件内容
+#!/bin/bash
+while read str; do
+    echo $str
+done <readme.txt
+hello
+world
+```
+    (3)连续交互输入
+
+```
+command <<EOF
+    document
+EOF
+``
+    注意：
+         1) <<之后的分界符可以自由定义，只要再碰到相同的分界符，两个分界符之间的内容将作为命令的输入, 使用特定的分界符作为命令输入的结束标志，而不使用 Ctrl+D 键
+         2) 输出也可以使用分界符方式
+ ```
+ 示例1：
+$ wc -l <<END
+    欢迎来到
+    菜鸟教程
+    www.runoob.com
+$END
+3 # 输出结果为 3 行
+ ```
+ 
+   (4) /dev/null 文件
+              
+      如果希望执行某个命令，但又不希望在屏幕上显示输出结果，那么可以将输出重定向到 /dev/null：
+                                   
+                     command > /dev/null
+
+      /dev/null 是一个特殊的文件，写入到它的内容都会被丢弃；
+    
+      如果尝试从该文件读取内容，那么什么也读不到。但是 /dev/null 文件非常有用，将命令的输出重定向到它，会起到"禁止输出"的效果。
+
+      如果希望屏蔽 stdout 和 stderr，可以这样写：command > /dev/null 2>&1          
+              
 > 文件包含
 
+     和其他语言一样，Shell 也可以包含外部脚本。这样可以很方便的封装一些公用的代码作为一个独立的文件。
 
+```
+Shell 文件包含的语法格式如下：
 
+. filename   # 注意点号(.)和文件名中间有一空格
 
+或
+source filename
+    
+示例1：
+test1.sh
+    #!/bin/bash
+    url="http://www.baidu.com"
 
+test2.sh
+    #使用 . 号来引用test1.sh 文件
+    . ./test1.sh
 
-> echo/printf/test 命令
+    # 或者使用以下包含文件代码
+    # source ./test1.sh
 
+    echo "网址为：$url"
 
+注意：
+     被包含的文件 test1.sh 不需要可执行权限。
+```
 
+> echo/printf 命令
 
+  (1)echo
+   
+    Shell 的 echo 指令是用于字符串的输出。命令格式:
+    
+        echo string
 
+```
+例子1：
+    echo -e "OK! \n"      # -e 开启转义 \n 换行
+    echo "It is a test"
+输出结果：
+    OK!
+    
+    It is a test  
+    
+例子2：
+    echo -e "OK! \c"     # -e 开启转义 \c 不换行
+    echo "It is a test"
+输出结果：
+    OK! It is a test
+```
+    
+  (2)printf
 
+    printf 命令模仿 C 程序库（library）里的 printf() 程序
+    
+    printf 使用引用文本或空格分隔的参数，外面可以在 printf 中使用格式化字符串，还可以制定字符串的宽度、左右对齐方式等。默认的 printf 不会像 echo 自动添加换行符，我们可以手动添加 \n。
+    
+```
+ printf 命令的语法：
 
+    printf  format-string  [arguments...]
+    
+参数说明：
+    format-string: 为格式控制字符串
+    arguments: 为参数列表。
 
+示例1：
+    $ echo "Hello, Shell"
+      Hello, Shell
+    $ printf "Hello, Shell\n"
+      Hello, Shell
 
+示例2：
+    printf "%-10s %-8s %-4s\n" 姓名 性别 体重kg  
+    printf "%-10s %-8s %-4.2f\n" 郭靖 男 66.1234
+    printf "%-10s %-8s %-4.2f\n" 杨过 男 48.6543
+    printf "%-10s %-8s %-4.2f\n" 郭芙 女 47.9876
+输出：
+    姓名     性别   体重kg
+    郭靖     男      66.12
+    杨过     男      48.65
+    郭芙     女      47.99
 
+注意：
+％s 输出一个字符串，％d 整型输出，％c 输出一个字符，％f 输出实数，以小数形式输出。
 
+%-10s 指一个宽度为 10 个字符（- 表示左对齐，没有则表示右对齐），任何字符都会被显示在 10 个字符宽的字符内，如果不足则自动以空格填充，超过也会将内容全部显示出来。
 
-
-
-
-
-
-
-
-
-
-
-
+%-4.2f 指格式化为小数，其中 .2 指保留2位小数   
+  
+```
+    
+    
