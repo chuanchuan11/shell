@@ -4,4 +4,5 @@
     
 > linux 常用shell命令
 
+    http://c.biancheng.net/linux_tutorial/10/
     http://c.biancheng.net/linux/
